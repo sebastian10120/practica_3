@@ -43,7 +43,7 @@ int main()
                 /*validacion de lado*/
                 ch = fila[a];
                 if (ch != ' '){
-                    ch = (ch >> bit) | (ch << (8 - bit));
+                    ch = (ch << bit) | (ch >> (8 - bit));
                     ch ^= llave;
                     fila[a] = ch;
                 }
@@ -61,7 +61,7 @@ int main()
                 ch = fila[a];
                 if (ch != ' '){
                     ch ^= llave;
-                    ch = (ch << bit) | (ch >> (8 - bit));
+                    ch = (ch >> bit) | (ch << (8 - bit));
                     fila[a] = ch;
                 }
                 cout << fila[a];

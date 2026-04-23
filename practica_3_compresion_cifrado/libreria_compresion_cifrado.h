@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
+void agregarTxt(char* a);
+int longitud(char* a);
 string comprobar_nombre_documento(string a){
     while(true){
         try {
@@ -37,30 +39,6 @@ string comprobar_nombre_documento(string a){
         }
     }
     return a;
-}
-
-string sin_numeros(string a){
-    while(true){
-        try {
-            cout << "Escribe el contenido del documento: ";
-            cin.ignore();
-            getline(cin, a);
-            if (a == ""){
-                throw runtime_error("no se puede añadir vacío");
-            }
-            else{
-                for (int b = 0; b < a.length(); b++ ){
-                    if (a[b] >= '0' && a[b] <= '9'){
-                        throw runtime_error("no se puede ingresar números");
-                    }
-                }
-            }
-            return a;
-        }
-        catch (runtime_error& e) {
-            cout << "Error: " << e.what() << " Intente de nuevo.\n";
-        }
-    }
 }
 int desplazamiento(int a){
     while(true){
@@ -97,6 +75,181 @@ char ingresar_llave(char a){
     }
 
     return a;
+}
+string ingresar_contenido_rle(string a){
+    bool valido = false;
+    while (!valido){
+        try{
+            cout << "Escriba el contenido del archivo (RLE):\n";
+            getline(cin, a);
+
+            if (a.length() < 1){
+                throw runtime_error("No se puede ingresar una cadena vacia");
+            }
+
+            if (a.length() > 500){
+                throw runtime_error("El contenido es demasiado largo");
+            }
+
+            valido = true; // si pasa todo, salimos del while
+
+        } catch(runtime_error& e){
+            cout << "Error: " << e.what() << " Intente de nuevo.\n";
+        }
+    }
+
+    return a;
+}
+int seleccionar_compresion(){
+    int opcion;
+
+    try{
+        cout << "Seleccione el tipo de compresion:\n";
+        cout << "1. RLE\n";
+        cout << "2. LZ78\n";
+        cin >> opcion;
+
+        if (cin.fail()){
+            throw runtime_error("Entrada no valida");
+        }
+
+        if (opcion != 1 && opcion != 2){
+            throw runtime_error("Opcion fuera de rango (solo 1 o 2)");
+        }
+    }
+    catch(runtime_error& e){
+        cout << "Error: " << e.what() << ". Intente de nuevo.\n";
+        cin.clear();
+        cin.ignore(50, '\n');
+        return seleccionar_compresion();
+    }
+
+    return opcion;
+}
+char *lista_nombre(char *a){
+    while(true){
+        try {
+            cout << "ingrese el nombre de documento:\n";
+            cin.ignore();
+            cin.getline(a,30);
+            int len = longitud(a);
+            if (len < 1){
+                throw runtime_error("no se puede ingresar una cadena vacia");
+            }
+            else if (len >= 30){
+                throw runtime_error("no se puede ingresar una cadena tan larga");
+            }
+            break;
+        } catch (runtime_error& e) {
+            cout << "Error: " << e.what() << " Intente de nuevo.\n";
+        }
+    }
+    agregarTxt(a);
+    return a;
+}
+int longitud(char* a) {
+    int i = 0;
+    while (a[i] != '\0') {
+        i++;
+    }
+    return i;
+}
+void agregarTxt(char* a) {
+    int len = longitud(a);
+    int posPunto = -1;
+    for (int i = 0; i < len; i++) {
+        if (a[i] == '.') {
+            posPunto = i;
+            break;
+        }
+    }
+    if (posPunto == -1) {
+        a[len] = '.';
+        a[len + 1] = 't';
+        a[len + 2] = 'x';
+        a[len + 3] = 't';
+        a[len + 4] = '\0';
+        return;
+    }
+    if (len - posPunto == 4 && a[posPunto+1] == 't' && a[posPunto+2] == 'x' &&  a[posPunto+3] == 't') {
+        return;
+    }
+    a[posPunto] = '.';
+    a[posPunto + 1] = 't';
+    a[posPunto + 2] = 'x';
+    a[posPunto + 3] = 't';
+    a[posPunto + 4] = '\0';
+}
+void texto(char *a){
+    while(true){
+        try{
+            cout << "escriba el contenido del texto";
+            cin.getline(a,500);
+            int len = longitud(a);
+            if (len < 1){
+                throw runtime_error("no se puede ingresar una cadena vacia");
+            }
+            else if (len >= 500){
+                throw runtime_error("no se puede ingresar una cadena tan larga");
+            }
+            break;
+        }
+        catch (runtime_error& e) {
+            cout << "Error: " << e.what() << " Intente de nuevo.\n";
+        }
+    }
+}
+void leer(char *contenido, char* nombre,int tamano_total){
+    fstream archivo(nombre, ios::in);
+    if (!archivo) {
+        cout << "Error al abrir el archivo.\n";
+        return;
+    }
+    int i = 0;
+    char ch;
+    while (archivo.get(ch) && i < tamano_total - 1) {
+        contenido[i++] = ch;
+    }
+    contenido[i] = '\0';
+    archivo.close();
+}
+void imprimirContenido(char* contenido) {
+    int i = 0;
+    while (contenido[i] != '\0') {
+        cout << contenido[i];
+        i++;
+    }
+    cout << endl;
+}
+void descomprimir(char *nombre){
+    fstream archivo(nombre, ios::in);
+    char diccionario[500][500];
+    for (int i = 0; i < 500; i++){
+        diccionario[i][0] = '\0';
+    }
+    int pref;
+    char ch;
+    int tam = 1;
+    while (archivo >> pref >> ch){
+        if (pref < 0 || pref >= tam){
+            pref = 0;
+        }
+        int i = 0;
+        while (diccionario[pref][i] != '\0'){
+            diccionario[tam][i] = diccionario[pref][i];
+            i++;
+        }
+        if (ch != '#'){
+            diccionario[tam][i] = ch;
+            diccionario[tam][i + 1] = '\0';
+        } else {
+            diccionario[tam][i] = '\0';
+        }
+        cout << diccionario[tam];
+        tam++;
+    }
+    archivo.close();
+    cout << endl;
 }
 
 #endif // LIBRERIA_COMPRESION_CIFRADO_H

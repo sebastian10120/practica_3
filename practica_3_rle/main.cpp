@@ -8,8 +8,6 @@ string sin_numeros(string a);
 /*substr me genera una nueva string desde el punto que yo marque*/
 
 int main(){
-    bool documento_abierto = false;
-    bool compresion_de_documento = true;
     string documento, fila;
     documento = comprobar_nombre_documento(documento);
     fstream abrir;
@@ -33,7 +31,6 @@ int main(){
     string contenido_extraido, contenido_entero;
     char ch_evaluado, ch_antiguo;
     while (getline(abrir,contenido_extraido)){
-        /*desde aqui se comprime*/
         string cadena_comprimida = "";
         int contador_iguales=1;
         for(int i= 0; i < contenido_extraido.length();i++){
@@ -64,7 +61,6 @@ int main(){
     char ch;
     string numero_repetido = "", linea = "";
     int numero = 0;
-    bool dato_tomado = true;
     while (getline(abrir,contenido_extraido)){
         ch = '\0';
         numero_repetido = "";
